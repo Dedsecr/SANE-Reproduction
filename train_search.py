@@ -78,38 +78,38 @@ def main():
     logging.info("args = %s", args.__dict__)
 
     if args.data == 'Amazon_Computers':
-        dataset = Amazon('../data/Amazon_Computers', 'Computers')
+        dataset = Amazon('./data/Amazon_Computers', 'Computers')
     elif args.data == 'Coauthor_Physics':
-        dataset = Coauthor('../data/Coauthor_Physics', 'Physics')
+        dataset = Coauthor('./data/Coauthor_Physics', 'Physics')
     elif args.data == 'Coauthor_CS':
-        dataset = Coauthor('../data/Coauthor_CS', 'CS')
+        dataset = Coauthor('./data/Coauthor_CS', 'CS')
     elif args.data == 'Cora_Full':
-        dataset = CoraFull('../data/Cora_Full')
+        dataset = CoraFull('./data/Cora_Full')
     elif args.data == 'PubMed':
-        dataset = Planetoid('../data/', 'PubMed')
+        dataset = Planetoid('./data/', 'PubMed')
     elif args.data == 'Cora':
-        dataset = Planetoid('../data/', 'Cora')
+        dataset = Planetoid('./data/', 'Cora')
     elif args.data == 'CiteSeer':
-        dataset = Planetoid('../data/', 'CiteSeer')
+        dataset = Planetoid('./data/', 'CiteSeer')
     elif args.data == 'PPI':
-        train_dataset = PPI('../data/PPI', split='train')
-        val_dataset = PPI('../data/PPI', split='val')
-        test_dataset = PPI('../data/PPI', split='test')
+        train_dataset = PPI('./data/PPI', split='train')
+        val_dataset = PPI('./data/PPI', split='val')
+        test_dataset = PPI('./data/PPI', split='test')
         ppi_train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
         ppi_val_loader = DataLoader(val_dataset, batch_size=2, shuffle=False)
         ppi_test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
         # print('load PPI done!')
         data = [ppi_train_loader, ppi_val_loader, ppi_test_loader]
     if args.data == 'small_Reddit':
-        dataset = Reddit('../data/Reddit/')
-        with open('../data/small_Reddit/sampled_reddit.obj', 'rb') as f:
+        dataset = Reddit('./data/Reddit/')
+        with open('./data/small_Reddit/sampled_reddit.obj', 'rb') as f:
             data = pickle.load(f)
-            raw_dir = '../data/small_Reddit/raw/'
+            raw_dir = './data/small_Reddit/raw/'
     elif args.data == 'small_arxiv':
         dataset = PygNodePropPredDataset(name='ogbn-arxiv')
-        with open('../data/small_arxiv/sampled_arxiv.obj', 'rb') as f:
+        with open('./data/small_arxiv/sampled_arxiv.obj', 'rb') as f:
             data = pickle.load(f)
-            raw_dir = '../data/small_arxiv/raw/'
+            raw_dir = './data/small_arxiv/raw/'
 
 
     # if not args.transductive:

@@ -115,13 +115,13 @@ def main(test_args):
 
   #path = osp.join('../data', 'Cora')
   if args.data == 'Amazon_Computers':
-    dataset = Amazon('../data/Amazon_Computers', 'Computers')
+    dataset = Amazon('./data/Amazon_Computers', 'Computers')
   elif args.data == 'Coauthor_Physics':
-    dataset = Coauthor('../data/Coauthor_Physics', 'Physics')
+    dataset = Coauthor('./data/Coauthor_Physics', 'Physics')
   elif args.data == 'Coauthor_CS':
-    dataset = Coauthor('../data/Coauthor_CS', 'CS')
+    dataset = Coauthor('./data/Coauthor_CS', 'CS')
   elif args.data == 'Cora_Full':
-    dataset = CoraFull('../data/Cora_Full')
+    dataset = CoraFull('./data/Cora_Full')
   data = save_load_split(dataset, 1, gen_uniform_60_20_20_split)
   edge_index, _ =  add_self_loops(data.edge_index)
   data.edge_index = edge_index

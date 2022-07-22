@@ -68,25 +68,25 @@ def main(test_args1):
 
   #path = osp.join('../data', 'Cora')
   if test_args.data == 'Amazon_Computers':
-    dataset = Amazon('../data/Amazon_Computers', 'Computers')
+    dataset = Amazon('./data/Amazon_Computers', 'Computers')
   elif test_args.data == 'Coauthor_Physics':
-    dataset = Coauthor('../data/Coauthor_Physics', 'Physics')
+    dataset = Coauthor('./data/Coauthor_Physics', 'Physics')
   elif test_args.data == 'Coauthor_CS':
-    dataset = Coauthor('../data/Coauthor_CS', 'CS')
+    dataset = Coauthor('./data/Coauthor_CS', 'CS')
   elif test_args.data == 'Cora_Full':
-    dataset = CoraFull('../data/Cora_Full')
+    dataset = CoraFull('./data/Cora_Full')
   elif test_args.data == 'PubMed':
-    dataset = Planetoid('../data/PubMed', 'PubMed')
+    dataset = Planetoid('./data/PubMed', 'PubMed')
   elif test_args.data == 'Cora':
-    dataset = Planetoid('../data/Cora', 'Cora')
+    dataset = Planetoid('./data/Cora', 'Cora')
   elif test_args.data == 'CiteSeer':
-    dataset = Planetoid('../data/CiteSeer', 'CiteSeer')
+    dataset = Planetoid('./data/CiteSeer', 'CiteSeer')
 
   if test_args.data == 'small_Reddit':
-    dataset = Reddit('../data/Reddit/')
-    with open('../data/small_Reddit/sampled_reddit.obj', 'rb') as f:
+    dataset = Reddit('./data/Reddit/')
+    with open('./data/small_Reddit/sampled_reddit.obj', 'rb') as f:
       data = pickle.load(f)
-      raw_dir = '../data/small_Reddit/raw/'
+      raw_dir = './data/small_Reddit/raw/'
   else:
       raw_dir = dataset.raw_dir
       data = dataset[0]

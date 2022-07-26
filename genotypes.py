@@ -1,4 +1,5 @@
 
+# node aggregator
 NA_PRIMITIVES = [
   'sage',
   'sage_sum',
@@ -13,11 +14,13 @@ NA_PRIMITIVES = [
   # 'geniepath',
 ]
 
-
+# skip connection
 SC_PRIMITIVES=[
   'none',
   'skip',
 ]
+
+# layer aggregator
 LA_PRIMITIVES=[
   'l_max',
   'l_concat',

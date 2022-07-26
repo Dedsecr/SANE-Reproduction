@@ -10,19 +10,19 @@ def act_map(act):
     if act == "linear":
         return lambda x: x
     elif act == "elu":
-        return torch.nn.functional.elu
+        return F.elu
     elif act == "sigmoid":
         return torch.sigmoid
     elif act == "tanh":
         return torch.tanh
     elif act == "relu":
-        return torch.nn.functional.relu
+        return F.relu
     elif act == "relu6":
-        return torch.nn.functional.relu6
+        return F.relu6
     elif act == "softplus":
-        return torch.nn.functional.softplus
+        return F.softplus
     elif act == "leaky_relu":
-        return torch.nn.functional.leaky_relu
+        return F.leaky_relu
     else:
         raise Exception("wrong activate function")
 
@@ -39,7 +39,7 @@ class NaMixedOp(nn.Module):
 
       if with_linear:
         self._ops_linear = nn.ModuleList()
-        op_linear = torch.nn.Linear(in_dim, out_dim)
+        op_linear = nn.Linear(in_dim, out_dim)
         self._ops_linear.append(op_linear)
 
   def forward(self, x, weights, edge_index, ):
@@ -107,9 +107,6 @@ class Network(nn.Module):
     self.layers = nn.ModuleList()
     for i in range(self.num_layers):
         self.layers.append(NaMixedOp(hidden_size, hidden_size,self.with_linear))
-    # self.layer1 = NaMixedOp(hidden_size, hidden_size,self.with_linear)
-    # self.layer2 = NaMixedOp(hidden_size, hidden_size,self.with_linear)
-    # self.layer3 = NaMixedOp(hidden_size, hidden_size,self.with_linear)
 
     #skip op
     self.scops = nn.ModuleList()
@@ -117,12 +114,6 @@ class Network(nn.Module):
         self.scops.append(ScMixedOp())
     if not self.args.fix_last:
         self.scops.append(ScMixedOp())
-    # self.layer4 = ScMixedOp()
-    # self.layer5 = ScMixedOp()
-    # if not self.args.fix_last:
-    #     self.layer6 = ScMixedOp()
-
-
 
     #layer aggregator op
     self.laop = LaMixedOp(hidden_size, num_layers)
@@ -144,34 +135,21 @@ class Network(nn.Module):
     x, edge_index = data.x, data.edge_index
     #prob = float(np.random.choice(range(1,11), 1) / 10.0)
     
+    #generate weights by softmax
     self.na_weights = F.softmax(self.na_alphas, dim=-1)
     self.sc_weights = F.softmax(self.sc_alphas, dim=-1)
     self.la_weights = F.softmax(self.la_alphas, dim=-1)
 
-    #generate weights by softmax
     x = self.lin1(x)
     x = F.dropout(x, p=self.dropout, training=self.training)
     jk = []
     for i in range(self.num_layers):
-        x = self.layers[i](x, self.na_weights[0], edge_index)
+        x = self.layers[i](x, self.na_weights[i], edge_index)
         x = F.dropout(x, p=self.dropout, training=self.training)
         if self.args.fix_last and i == self.num_layers-1:
             jk += [x]
         else:
             jk += [self.scops[i](x, self.sc_weights[i])]
-    # x1 = self.layer1(x, self.na_weights[0], edge_index)
-    # x1 = F.dropout(x1, p=self.dropout, training=self.training)
-    # x2 = self.layer2(x1, self.na_weights[1], edge_index)
-    # x2 = F.dropout(x2, p=self.dropout, training=self.training)
-    # x3 = self.layer3(x2, self.na_weights[2], edge_index)
-    # x3 = F.dropout(x3, p=self.dropout, training=self.training)
-
-    # if self.args.fix_last:
-    #     x4 = (x3, self.layer4(x1, self.sc_weights[0]), self.layer5(x2, self.sc_weights[1]))
-    # else:
-    #     x4 = (self.layer4(x1, self.sc_weights[0]), self.layer5(x2, self.sc_weights[1]), self.layer6(x3, self.sc_weights[2]))
-    # x5 = self.layer7(x4, self.la_weights[0])
-    # x5 = F.dropout(x5, p=self.dropout, training=self.training)
 
     merge_feature = self.laop(jk, self.la_weights[0])
     merge_feature = F.dropout(merge_feature, p=self.dropout, training=self.training)
@@ -200,11 +178,11 @@ class Network(nn.Module):
     num_la_ops = len(LA_PRIMITIVES)
 
     #self.alphas_normal = Variable(1e-3*torch.randn(k, num_ops).cuda(), requires_grad=True)
-    self.na_alphas = Variable(1e-3*torch.randn(3, num_na_ops).cuda(), requires_grad=True)
+    self.na_alphas = Variable(1e-3*torch.randn(self.num_layers, num_na_ops).cuda(), requires_grad=True)
     if self.args.fix_last:
-        self.sc_alphas = Variable(1e-3*torch.randn(2, num_sc_ops).cuda(), requires_grad=True)
+        self.sc_alphas = Variable(1e-3*torch.randn(self.num_layers-1, num_sc_ops).cuda(), requires_grad=True)
     else:
-        self.sc_alphas = Variable(1e-3*torch.randn(3, num_sc_ops).cuda(), requires_grad=True)
+        self.sc_alphas = Variable(1e-3*torch.randn(self.num_layers, num_sc_ops).cuda(), requires_grad=True)
 
     self.la_alphas = Variable(1e-3*torch.randn(1, num_la_ops).cuda(), requires_grad=True)
     self._arch_parameters = [
@@ -235,7 +213,6 @@ class Network(nn.Module):
 
     gene = _parse(F.softmax(self.na_alphas, dim=-1).data.cpu(), F.softmax(self.sc_alphas, dim=-1).data.cpu(), F.softmax(self.la_alphas, dim=-1).data.cpu())
 
-
     return gene
 
   def sample_arch(self):
@@ -263,19 +240,19 @@ class Network(nn.Module):
     num_la_ops = len(LA_PRIMITIVES)
 
 
-    na_alphas = Variable(torch.zeros(3, num_na_ops).cuda(), requires_grad=True)
-    sc_alphas = Variable(torch.zeros(2, num_sc_ops).cuda(), requires_grad=True)
+    na_alphas = Variable(torch.zeros(self.num_layers, num_na_ops).cuda(), requires_grad=True)
+    sc_alphas = Variable(torch.zeros(self.num_layers-1, num_sc_ops).cuda(), requires_grad=True)
     la_alphas = Variable(torch.zeros(1, num_la_ops).cuda(), requires_grad=True)
 
-    for i in range(3):
+    for i in range(self.num_layers):
         ind = NA_PRIMITIVES.index(arch_ops[i])
         na_alphas[i][ind] = 1
 
-    for i in range(3, 5):
+    for i in range(self.num_layers, self.num_layers * 2 - 1):
         ind = SC_PRIMITIVES.index(arch_ops[i])
-        sc_alphas[i-3][ind] = 1
+        sc_alphas[i-self.num_layers][ind] = 1
 
-    ind = LA_PRIMITIVES.index(arch_ops[5])
+    ind = LA_PRIMITIVES.index(arch_ops[self.num_layers*2-1])
     la_alphas[0][ind] = 1
 
     arch_parameters = [na_alphas, sc_alphas, la_alphas]
@@ -286,6 +263,3 @@ class Network(nn.Module):
     self.sc_weights = weights[1]
     self.la_weights = weights[2]
     #self._arch_parameters = [self.na_alphas, self.sc_alphas, self.la_alphas]
-
-
-

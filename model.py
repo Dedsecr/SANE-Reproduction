@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from operations import *
 from torch.autograd import Variable
 from utils import drop_path
@@ -9,19 +10,19 @@ def act_map(act):
     if act == "linear":
         return lambda x: x
     elif act == "elu":
-        return torch.nn.functional.elu
+        return F.elu
     elif act == "sigmoid":
         return torch.sigmoid
     elif act == "tanh":
         return torch.tanh
     elif act == "relu":
-        return torch.nn.functional.relu
+        return F.relu
     elif act == "relu6":
-        return torch.nn.functional.relu6
+        return F.relu6
     elif act == "softplus":
-        return torch.nn.functional.softplus
+        return F.softplus
     elif act == "leaky_relu":
-        return torch.nn.functional.leaky_relu
+        return F.leaky_relu
     else:
         raise Exception("wrong activate function")
 

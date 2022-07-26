@@ -150,7 +150,7 @@ def main(exp_args):
             best_test_acc = test_acc
 
         if epoch % 10 == 0:
-            logging.info('epoch=%s, lr=%s, train_obj=%s, train_acc=%f, valid_acc=%s, test_acc=%s', epoch, scheduler.get_lr()[0], train_obj, train_acc, best_val_acc, best_test_acc)
+            logging.info('epoch=%s, lr=%s, train_obj=%s, train_acc=%f, valid_acc=%s, test_acc=%s', epoch, scheduler.get_last_lr()[0], train_obj, train_acc, best_val_acc, best_test_acc)
 
         utils.save(model, os.path.join(train_args.save, 'weights.pt'))
 

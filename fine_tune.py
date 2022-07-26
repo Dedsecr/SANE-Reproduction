@@ -24,7 +24,7 @@ sane_space ={'model': 'SANE',
 
 def get_args():
     parser = argparse.ArgumentParser("sane")
-    parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
+    parser.add_argument('--gpu', type=int, default=3, help='gpu device id')
     parser.add_argument('--data', type=str, default='../data', help='location of the data corpus')
     parser.add_argument('--arch_filename', type=str, default='', help='given the location of searched res')
     parser.add_argument('--arch', type=str, default='', help='given the specific of searched res')
@@ -81,7 +81,7 @@ def run_fine_tune():
     tune_str = time.strftime('%Y%m%d-%H%M%S')
     path = 'logs/tune-%s_%s' % (args1.data, tune_str)
     if not os.path.exists(path):
-      os.mkdir(path)
+      os.makedirs(path)
     log_filename = os.path.join(path, 'log.txt')
     init_logger('fine-tune', log_filename, logging.INFO, False)
 

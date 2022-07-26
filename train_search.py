@@ -37,7 +37,7 @@ parser.add_argument('--learning_rate', type=float, default=0.025, help='init lea
 parser.add_argument('--learning_rate_min', type=float, default=0.001, help='min learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=5e-4, help='weight decay')
-parser.add_argument('--gpu', type=int, default=4, help='gpu device id')
+parser.add_argument('--gpu', type=int, default=3, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=10, help='num of training epochs')
 parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
 parser.add_argument('--save', type=str, default='EXP', help='experiment name')
@@ -111,14 +111,10 @@ def main():
             data = pickle.load(f)
             raw_dir = './data/small_arxiv/raw/'
 
-
-    # if not args.transductive:
-        #622 split
-        # data = save_load_split(data, raw_dir, 1, gen_uniform_60_20_20_split)
     if args.data != 'PPI':
         raw_dir = dataset.raw_dir
         data = dataset[0]
-        data = save_load_split(data, raw_dir, 1, gen_uniform_60_20_20_split)
+        data = save_load_split(data, raw_dir, 1, gen_uniform_60_20_20_split) # use mask to split dataset
 
         edge_index, _ = add_self_loops(data.edge_index, num_nodes=data.x.size(0))
         data.edge_index = edge_index
@@ -150,7 +146,7 @@ def main():
     search_cost = 0
     for epoch in range(args.epochs):
         t1 = time.time()
-        lr = scheduler.get_lr()[0]
+        lr = scheduler.get_last_lr()[0]
         if epoch % 1 == 0:
             logging.info('epoch %d lr %e', epoch, lr)
             genotype = model.genotype()
@@ -227,16 +223,8 @@ def infer_trans(data, model, criterion, test=False):
         logits = model(data.to(device))
     if test:
         mask = data.test_mask
-        # input = logits[].to(device)
-        # target = data.y[data.test_mask].to(device)
-        # loss = criterion(input, target)
-        # print('test_loss:', loss.item())
     else:
         mask = data.val_mask
-        # input = logits[data.val_mask].to(device)
-        # target = data.y[data.val_mask].to(device)
-        # loss = criterion(input, target)
-        # print('valid_loss:', loss.item())
     input = logits[mask].to(device)
     target = data.y[mask].to(device)
     loss = criterion(input, target)
@@ -310,6 +298,8 @@ def run_by_seed():
         genotype = main()
         res.append('seed={},genotype={},saved_dir={}'.format(seed, genotype, args.save))
     filename = 'exp_res/%s-searched_res-%s-eps%s-reg%s.txt' % (args.data, time.strftime('%Y%m%d-%H%M%S'), args.epsilon, args.weight_decay)
+    if not os.path.exists('exp_res'):
+        os.makedirs('exp_res')
     fw = open(filename, 'w+')
     fw.write('\n'.join(res))
     fw.close()

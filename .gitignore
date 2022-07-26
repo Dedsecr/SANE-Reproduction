@@ -1,3 +1,6 @@
 data/
 __pycache__
 mytest.py
+logs
+exp_res
+tuned_res

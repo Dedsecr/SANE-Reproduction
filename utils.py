@@ -234,7 +234,7 @@ def drop_path(x, drop_prob):
 
 def create_exp_dir(path, scripts_to_save=None):
   if not os.path.exists(path):
-    os.mkdir(path)
+    os.makedirs(path)
   print('Experiment dir : {}'.format(path))
 
   if scripts_to_save is not None:
@@ -248,10 +248,6 @@ def index_to_mask(index, size):
     mask[index] = 1
     return mask
 
-# def gen_uniform_60_20_20_split(data):
-#     skf = StratifiedKFold(5, shuffle=True, random_state=12345)
-#     idx = [torch.from_numpy(i) for _, i in skf.split(data.y, data.y)]
-#     return cat(idx[:3], 0), cat(idx[3:4], 0), cat(idx[4:], 0)
 def gen_uniform_60_20_20_split(data):
     skf = StratifiedKFold(10, shuffle=True, random_state=12345)
     idx = [torch.from_numpy(i) for _, i in skf.split(data.y, data.y)]
